@@ -94,7 +94,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	auto* enum_list = hid_enumerate(0x8089, 0x0009);
 	if (!enum_list) {
 		printf("hid_enumerate failed: %ls\n", hid_error(NULL));
