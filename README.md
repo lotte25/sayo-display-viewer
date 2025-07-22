@@ -1,3 +1,8 @@
 # SayoDevice O3C Display Viewer
 
-THIS CODE IS NOT BY ME. I just adapted it to CMake. Credits to that one guy in SayoDevice's Discord server.
+THE ORIGINAL CODE IS NOT BY ME. Credits to that one guy in SayoDevice's Discord server.
+
+## Roadmap
+[ ] Port to SDL
+[ ] Add Linux and MacOS support
+[ ] Try to make the code more modular and legible
