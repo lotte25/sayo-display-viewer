@@ -15,6 +15,11 @@ typedef struct {
 	DWORD               bmiColors[3];
 } BITMAPINFOJANK;
 
+enum class TimerId {
+    DisplayUpdate = 1,
+    Reconnection = 2
+};
+
 bool TryConnectToHidDevice() {
     if (g_handle) {
         hid_close(g_handle);
@@ -46,18 +51,18 @@ bool TryConnectToHidDevice() {
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
 	case WM_CREATE: {
-		SetTimer(hwnd, 1, 8, NULL);
-        SetTimer(hwnd, 2, 1000, NULL);
+		SetTimer(hwnd, static_cast<UINT_PTR>(TimerId::DisplayUpdate), 8, NULL);
+        SetTimer(hwnd, static_cast<UINT_PTR>(TimerId::Reconnection), 1000, NULL);
 		break;
 	}
 	case WM_DESTROY: {
-		KillTimer(hwnd, 1);
-        KillTimer(hwnd, 2);
+		KillTimer(hwnd, static_cast<UINT_PTR>(TimerId::DisplayUpdate));
+        KillTimer(hwnd, static_cast<UINT_PTR>(TimerId::Reconnection));
 		PostQuitMessage(0);
 		break;
 	}
 	case WM_TIMER: {
-        if (wParam == 1) {
+        if (wParam == static_cast<WPARAM>(TimerId::DisplayUpdate)) {
             if (g_reconnecting || g_handle == nullptr) {
                 InvalidateRect(hwnd, NULL, FALSE);
                 return 0;
@@ -113,7 +118,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 }
             }
             InvalidateRect(hwnd, NULL, FALSE);
-        } else if (wParam == 2) {
+        } else if (wParam == static_cast<WPARAM>(TimerId::Reconnection)) {
             if (g_reconnecting) {
                 fprintf(stderr, "Attempting to reconnect...\n");
                 if (TryConnectToHidDevice()) {
