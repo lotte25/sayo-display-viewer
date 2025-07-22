@@ -1,0 +1,62 @@
+name: Build & Release Windows App
+
+on: 
+    workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository and Submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Setup MSVC Environment
+      uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
+        vs-version: 'latest'
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "Visual Studio 17 2022" -A x64
+
+    - name: Build with CMake
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Upload Executable as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SayoDeviceDisplay-build
+        path: build/Release/SayoDeviceDisplay.exe
+        if-no-files-found: error
+        retention-days: 5
+
+  create-release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Download Executable Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: SayoDeviceDisplay-build
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Release ${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        files: SayoDeviceDisplay.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
